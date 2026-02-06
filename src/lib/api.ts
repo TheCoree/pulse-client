@@ -1,8 +1,8 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: 'http://192.168.0.9:8000',
-  withCredentials: true, // 🔥 ОБЯЗАТЕЛЬНО
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  withCredentials: true, // cookies (auth)
 })
 
 let isRefreshing = false
