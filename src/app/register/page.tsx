@@ -96,7 +96,7 @@ export default function RegisterPage() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-background text-foreground p-4">
       <StarsBackground
-        starColor={resolvedTheme === 'dark' ? '#FFF' : '#000'}
+        starColor={resolvedTheme === 'dark' ? '#000' : '#FFF'}
         className={cn('absolute inset-0 h-screen')}
       />
 
