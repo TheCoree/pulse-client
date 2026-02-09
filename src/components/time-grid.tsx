@@ -13,6 +13,7 @@ import {
 import { ru } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
 import { Card, CardContent } from '@/components/ui/card'
+import TimeAxisIndicator from './time-grid/time-axis-indicator'
 
 interface Event {
   id: number
@@ -74,7 +75,7 @@ export function TimeGrid({
               className={cn(
                 'text-lg font-semibold',
                 isToday(day) &&
-                  'w-6 h-6 flex items-center justify-center rounded-full bg-red-500 text-white text-sm'
+                'w-6 h-6 flex items-center justify-center rounded-full bg-red-500 text-white text-sm'
               )}
             >
               {format(day, 'd')}
@@ -91,7 +92,8 @@ export function TimeGrid({
       <div className="flex flex-1 overflow-auto relative">
 
         {/* TIME COLUMN */}
-        <div className="sticky left-0 w-16 flex-shrink-0 border-r border-border bg-muted/5 z-10">
+        <div className="sticky left-0 w-16 flex-shrink-0 border-r border-border bg-muted/5 z-10 relative">
+          <TimeAxisIndicator startHour={startHour} />
           {hours.map(hour => (
             <div
               key={hour}

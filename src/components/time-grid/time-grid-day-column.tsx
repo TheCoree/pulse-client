@@ -81,12 +81,12 @@ export default function TimeGridDayColumn({
       ))}
 
       {/* LIVE TIME */}
-      {isTodayDay && (
-        <TimeGridTimeline
-          now={now}
-          startHour={startHour}
-        />
-      )}
+      <TimeGridTimeline
+        now={now}
+        startHour={startHour}
+        endHour={endHour}
+        isToday={isTodayDay}
+      />
 
       {/* EVENTS */}
       {overlapGroups.map(group =>
