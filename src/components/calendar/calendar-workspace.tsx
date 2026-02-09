@@ -136,6 +136,7 @@ export default function CalendarWorkspace() {
         onPrev={() => setCurrentDate(subDays(currentDate, numDays))}
         onNext={() => setCurrentDate(addDays(currentDate, numDays))}
         onToday={() => setCurrentDate(startOfToday())}
+        onDateSelect={setCurrentDate}
         onRefresh={fetchEvents}
         onStartHourChange={setStartHour}
         onEndHourChange={setEndHour}

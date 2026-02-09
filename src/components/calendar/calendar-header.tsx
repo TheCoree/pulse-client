@@ -41,6 +41,7 @@ interface CalendarHeaderProps {
   onPrev: () => void
   onNext: () => void
   onToday: () => void
+  onDateSelect: (date: Date) => void
   onRefresh: () => void
 
   onStartHourChange: (value: number) => void
@@ -58,6 +59,7 @@ export default function CalendarHeader({
   onPrev,
   onNext,
   onToday,
+  onDateSelect,
   onRefresh,
   onStartHourChange,
   onEndHourChange,
@@ -100,7 +102,7 @@ export default function CalendarHeader({
               <Calendar
                 mode="single"
                 selected={currentDate}
-                onSelect={date => date && onToday()}
+                onSelect={date => date && onDateSelect(date)}
                 locale={ru}
               />
             </PopoverContent>
@@ -143,90 +145,90 @@ export default function CalendarHeader({
           </Button>
         </AnimateIcon>
 
-      <DropdownMenu>
-        <Tooltip>
-          <TooltipTrigger>
-            <DropdownMenuTrigger>
-              <AnimateIcon animateOnHover>
-                <Button variant="ghost" size="icon" className="h-9 w-9">
-                  <Cog size={25}/>
-                </Button>
-              </AnimateIcon>
-            </DropdownMenuTrigger>
-          </TooltipTrigger>
-          <TooltipContent>Настройки</TooltipContent>
-        </Tooltip>
+        <DropdownMenu>
+          <Tooltip>
+            <TooltipTrigger>
+              <DropdownMenuTrigger>
+                <AnimateIcon animateOnHover>
+                  <Button variant="ghost" size="icon" className="h-9 w-9">
+                    <Cog size={25} />
+                  </Button>
+                </AnimateIcon>
+              </DropdownMenuTrigger>
+            </TooltipTrigger>
+            <TooltipContent>Настройки</TooltipContent>
+          </Tooltip>
 
-        <DropdownMenuContent align="end" className="w-72">
-          <DropdownMenuGroup>
-            <DropdownMenuLabel className="px-3 py-2 text-sm font-semibold">
-              Настройки отображения
-            </DropdownMenuLabel>
-          </DropdownMenuGroup>
+          <DropdownMenuContent align="end" className="w-72">
+            <DropdownMenuGroup>
+              <DropdownMenuLabel className="px-3 py-2 text-sm font-semibold">
+                Настройки отображения
+              </DropdownMenuLabel>
+            </DropdownMenuGroup>
 
-          <DropdownMenuSeparator />
+            <DropdownMenuSeparator />
 
-          <div className="px-3 py-4 space-y-6">
-            <div className="space-y-2">
-              <Label className="text-xs font-medium text-muted-foreground px-1">
-                Начало дня
-              </Label>
+            <div className="px-3 py-4 space-y-6">
+              <div className="space-y-2">
+                <Label className="text-xs font-medium text-muted-foreground px-1">
+                  Начало дня
+                </Label>
 
-              <Select
-                value={startHour.toString()}
-                onValueChange={v => onStartHourChange(Number(v))}
-              >
-                <SelectTrigger className="w-full h-9">
-                  <SelectValue />
-                </SelectTrigger>
+                <Select
+                  value={startHour.toString()}
+                  onValueChange={v => onStartHourChange(Number(v))}
+                >
+                  <SelectTrigger className="w-full h-9">
+                    <SelectValue />
+                  </SelectTrigger>
 
-                <SelectContent side="right" align="start">
-                  {Array.from({ length: 24 }, (_, i) => (
-                    <SelectItem key={i} value={i.toString()}>
-                      {i}:00
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                  <SelectContent side="right" align="start">
+                    {Array.from({ length: 24 }, (_, i) => (
+                      <SelectItem key={i} value={i.toString()}>
+                        {i}:00
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs font-medium text-muted-foreground px-1">
+                  Конец дня
+                </Label>
+
+                <Select
+                  value={endHour.toString()}
+                  onValueChange={v => onEndHourChange(Number(v))}
+                >
+                  <SelectTrigger className="w-full h-9">
+                    <SelectValue />
+                  </SelectTrigger>
+
+                  <SelectContent side="right" align="start">
+                    {Array.from({ length: 24 }, (_, i) => (
+                      <SelectItem key={i} value={i.toString()}>
+                        {i}:00
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <Label className="text-xs font-medium text-muted-foreground px-1">
-                Конец дня
-              </Label>
+            <DropdownMenuSeparator />
 
-              <Select
-                value={endHour.toString()}
-                onValueChange={v => onEndHourChange(Number(v))}
-              >
-                <SelectTrigger className="w-full h-9">
-                  <SelectValue />
-                </SelectTrigger>
-
-                <SelectContent side="right" align="start">
-                  {Array.from({ length: 24 }, (_, i) => (
-                    <SelectItem key={i} value={i.toString()}>
-                      {i}:00
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <DropdownMenuSeparator />
-
-          <DropdownMenuGroup>
-            <DropdownMenuItem className="cursor-pointer px-3 py-2.5">
-              Экспорт календаря
-            </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer px-3 py-2.5">
-              Печать недели
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+            <DropdownMenuGroup>
+              <DropdownMenuItem className="cursor-pointer px-3 py-2.5">
+                Экспорт календаря
+              </DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer px-3 py-2.5">
+                Печать недели
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     </header >
   )
 }
