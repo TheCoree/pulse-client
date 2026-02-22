@@ -97,11 +97,13 @@ export default function EventForm({
         <div className="text-sm font-medium">Начало</div>
 
         <Popover>
-          <PopoverTrigger>
-            <Button variant="outline" className="w-full justify-start">
-              {format(startDate, 'dd MMM yyyy', { locale: ru })}
-            </Button>
-          </PopoverTrigger>
+          <PopoverTrigger
+            render={
+              <Button variant="outline" className="w-full justify-start">
+                {format(startDate, 'dd MMM yyyy', { locale: ru })}
+              </Button>
+            }
+          />
           <PopoverContent className="p-0">
             <Calendar
               mode="single"
@@ -131,11 +133,13 @@ export default function EventForm({
         <div className="text-sm font-medium">Конец</div>
 
         <Popover>
-          <PopoverTrigger>
-            <Button variant="outline" className="w-full justify-start">
-              {format(endDate, 'dd MMM yyyy', { locale: ru })}
-            </Button>
-          </PopoverTrigger>
+          <PopoverTrigger
+            render={
+              <Button variant="outline" className="w-full justify-start">
+                {format(endDate, 'dd MMM yyyy', { locale: ru })}
+              </Button>
+            }
+          />
           <PopoverContent className="p-0">
             <Calendar
               mode="single"

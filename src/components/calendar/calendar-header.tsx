@@ -89,14 +89,16 @@ export default function CalendarHeader({
           </Button>
 
           <Popover>
-            <PopoverTrigger>
-              <Button
-                variant="ghost"
-                className="px-3 h-9 min-w-[200px] text-sm font-medium justify-center"
-              >
-                {displayRange}
-              </Button>
-            </PopoverTrigger>
+            <PopoverTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  className="px-3 h-9 min-w-[200px] text-sm font-medium justify-center"
+                >
+                  {displayRange}
+                </Button>
+              }
+            />
 
             <PopoverContent className="w-auto p-0">
               <Calendar
@@ -122,18 +124,20 @@ export default function CalendarHeader({
       <div className="flex items-center gap-3">
 
         <Tooltip>
-          <TooltipTrigger>
-            <AnimateIcon animateOnHover>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-9 w-9"
-                onClick={onRefresh}
-              >
-                <RefreshCw size={18} />
-              </Button>
-            </AnimateIcon>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <AnimateIcon animateOnHover asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-9 w-9"
+                  onClick={onRefresh}
+                >
+                  <RefreshCw size={18} />
+                </Button>
+              </AnimateIcon>
+            }
+          />
           <TooltipContent>Обновить</TooltipContent>
         </Tooltip>
 
@@ -147,15 +151,19 @@ export default function CalendarHeader({
 
         <DropdownMenu>
           <Tooltip>
-            <TooltipTrigger>
-              <DropdownMenuTrigger>
-                <AnimateIcon animateOnHover>
-                  <Button variant="ghost" size="icon" className="h-9 w-9">
-                    <Cog size={25} />
-                  </Button>
-                </AnimateIcon>
-              </DropdownMenuTrigger>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <DropdownMenuTrigger
+                  render={
+                    <AnimateIcon animateOnHover asChild>
+                      <Button variant="ghost" size="icon" className="h-9 w-9">
+                        <Cog size={25} />
+                      </Button>
+                    </AnimateIcon>
+                  }
+                />
+              }
+            />
             <TooltipContent>Настройки</TooltipContent>
           </Tooltip>
 

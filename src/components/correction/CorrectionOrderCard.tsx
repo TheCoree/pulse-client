@@ -126,17 +126,19 @@ export function CorrectionOrderCard({
                             {new Date(order.created_at).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                         </div>
                         <Tooltip>
-                            <TooltipTrigger>
-                                <a
-                                    href={tgLink}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors font-mono"
-                                >
-                                    TG ID: {order.telegram_user_id}
-                                    <ExternalLink className="w-2.5 h-2.5" />
-                                </a>
-                            </TooltipTrigger>
+                            <TooltipTrigger
+                                render={
+                                    <a
+                                        href={tgLink}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors font-mono"
+                                    >
+                                        TG ID: {order.telegram_user_id}
+                                        <ExternalLink className="w-2.5 h-2.5" />
+                                    </a>
+                                }
+                            />
                             <TooltipContent>Открыть профиль в Telegram</TooltipContent>
                         </Tooltip>
                     </div>
@@ -144,25 +146,27 @@ export function CorrectionOrderCard({
                     {isCorrector && (
                         <div className="flex items-center gap-1.5">
                             <Tooltip>
-                                <TooltipTrigger>
-                                    <Button
-                                        size="sm"
-                                        disabled={order.is_user_confirmed}
-                                        variant={order.is_corrected ? "secondary" : "default"}
-                                        className={`h-8 px-3 text-xs font-semibold transition-all ${!order.is_corrected ? "bg-green-600 hover:bg-green-700 text-white shadow-sm" : ""}`}
-                                        onClick={() => onUpdateStatus(order.id, {
-                                            is_corrected: !order.is_corrected,
-                                            is_rejected: false,
-                                            is_reported: false,
-                                            report_text: null,
-                                            is_user_confirmed: false,
-                                            is_updated: false // Сбрасываем флаг обновления, так как админ посмотрел
-                                        })}
-                                    >
-                                        <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
-                                        {order.is_corrected ? "Откатить" : "Готово"}
-                                    </Button>
-                                </TooltipTrigger>
+                                <TooltipTrigger
+                                    render={
+                                        <Button
+                                            size="sm"
+                                            disabled={order.is_user_confirmed}
+                                            variant={order.is_corrected ? "secondary" : "default"}
+                                            className={`h-8 px-3 text-xs font-semibold transition-all ${!order.is_corrected ? "bg-green-600 hover:bg-green-700 text-white shadow-sm" : ""}`}
+                                            onClick={() => onUpdateStatus(order.id, {
+                                                is_corrected: !order.is_corrected,
+                                                is_rejected: false,
+                                                is_reported: false,
+                                                report_text: null,
+                                                is_user_confirmed: false,
+                                                is_updated: false // Сбрасываем флаг обновления, так как админ посмотрел
+                                            })}
+                                        >
+                                            <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
+                                            {order.is_corrected ? "Откатить" : "Готово"}
+                                        </Button>
+                                    }
+                                />
                                 <TooltipContent className="text-[10px]">
                                     {order.is_user_confirmed
                                         ? "Нельзя отменить, клиент уже подтвердил наличие"
@@ -172,59 +176,65 @@ export function CorrectionOrderCard({
                             </Tooltip>
 
                             <Tooltip>
-                                <TooltipTrigger>
-                                    <Button
-                                        size="sm"
-                                        disabled={order.is_user_confirmed}
-                                        variant={order.is_reported ? "secondary" : "outline"}
-                                        className={`h-8 w-8 p-0 rounded-md transition-all ${order.is_reported ? "bg-blue-600/20 text-blue-700 hover:bg-blue-600/30 ring-1 ring-blue-600/30" : ""}`}
-                                        onClick={() => {
-                                            if (order.is_reported) {
-                                                onUpdateStatus(order.id, { is_reported: false, report_text: null })
-                                            } else {
-                                                onReport(order.id)
-                                            }
-                                        }}
-                                    >
-                                        <AlertCircle className="w-3.5 h-3.5" />
-                                    </Button>
-                                </TooltipTrigger>
+                                <TooltipTrigger
+                                    render={
+                                        <Button
+                                            size="sm"
+                                            disabled={order.is_user_confirmed}
+                                            variant={order.is_reported ? "secondary" : "outline"}
+                                            className={`h-8 w-8 p-0 rounded-md transition-all ${order.is_reported ? "bg-blue-600/20 text-blue-700 hover:bg-blue-600/30 ring-1 ring-blue-600/30" : ""}`}
+                                            onClick={() => {
+                                                if (order.is_reported) {
+                                                    onUpdateStatus(order.id, { is_reported: false, report_text: null })
+                                                } else {
+                                                    onReport(order.id)
+                                                }
+                                            }}
+                                        >
+                                            <AlertCircle className="w-3.5 h-3.5" />
+                                        </Button>
+                                    }
+                                />
                                 <TooltipContent className="text-[10px]">{order.is_user_confirmed ? "Заблокировано" : (order.is_reported ? "Отменить запрос" : "Запросить доп. информацию")}</TooltipContent>
                             </Tooltip>
 
                             <Tooltip>
-                                <TooltipTrigger>
-                                    <Button
-                                        size="sm"
-                                        disabled={order.is_user_confirmed}
-                                        variant={order.is_rejected ? "destructive" : "outline"}
-                                        className={`h-8 w-8 p-0 rounded-md transition-all ${order.is_rejected ? "bg-destructive text-destructive-foreground" : ""}`}
-                                        onClick={() => onUpdateStatus(order.id, {
-                                            is_rejected: !order.is_rejected,
-                                            is_corrected: false,
-                                            is_reported: false,
-                                            report_text: null
-                                        })}
-                                    >
-                                        <XCircle className="w-3.5 h-3.5" />
-                                    </Button>
-                                </TooltipTrigger>
+                                <TooltipTrigger
+                                    render={
+                                        <Button
+                                            size="sm"
+                                            disabled={order.is_user_confirmed}
+                                            variant={order.is_rejected ? "destructive" : "outline"}
+                                            className={`h-8 w-8 p-0 rounded-md transition-all ${order.is_rejected ? "bg-destructive text-destructive-foreground" : ""}`}
+                                            onClick={() => onUpdateStatus(order.id, {
+                                                is_rejected: !order.is_rejected,
+                                                is_corrected: false,
+                                                is_reported: false,
+                                                report_text: null
+                                            })}
+                                        >
+                                            <XCircle className="w-3.5 h-3.5" />
+                                        </Button>
+                                    }
+                                />
                                 <TooltipContent className="text-[10px]">{order.is_user_confirmed ? "Заблокировано" : (order.is_rejected ? "Отменить отклонение" : "Отклонить заявку")}</TooltipContent>
                             </Tooltip>
 
                             <div className="w-px h-4 bg-muted mx-1" />
 
                             <Tooltip>
-                                <TooltipTrigger>
-                                    <Button
-                                        size="sm"
-                                        variant="ghost"
-                                        className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-all"
-                                        onClick={() => onDelete(order.id)}
-                                    >
-                                        <Trash2 className="w-3.5 h-3.5" />
-                                    </Button>
-                                </TooltipTrigger>
+                                <TooltipTrigger
+                                    render={
+                                        <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-all"
+                                            onClick={() => onDelete(order.id)}
+                                        >
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                        </Button>
+                                    }
+                                />
                                 <TooltipContent className="text-[10px]">Полностью удалить заявку</TooltipContent>
                             </Tooltip>
                         </div>
