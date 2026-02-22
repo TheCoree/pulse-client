@@ -32,7 +32,7 @@ export default function TimeAxisIndicator({
             className="absolute right-0 z-30 translate-y-[-50%] pr-2 pointer-events-none"
             style={{ top }}
         >
-            <div className="bg-foreground text-background text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">
+            <div className="bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">
                 {format(now, 'HH:mm')}
             </div>
         </div>
