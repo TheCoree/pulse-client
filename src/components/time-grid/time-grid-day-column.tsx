@@ -57,7 +57,7 @@ export default function TimeGridDayColumn({
   const dayStart = startOfDay(day)
   const dayEnd = endOfDay(day)
 
-  const dayEvents = events.filter(e => {
+  const dayEvents = events.filter((e: any) => {
     const s = new Date(e.start)
     const en = new Date(e.end)
     return en > dayStart && s < dayEnd
