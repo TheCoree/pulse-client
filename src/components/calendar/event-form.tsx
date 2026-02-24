@@ -64,7 +64,7 @@ export default function EventForm({
 
     try {
       if (mode === 'create') {
-        await api.post(`/calendars/${calendarId}/events`, body)
+        await api.post(`/calendars/${calendarId}/events/`, body)
         toast.success('Событие создано')
       } else {
         await api.put(`/calendars/${calendarId}/events/${event.id}`, body)
