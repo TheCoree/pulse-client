@@ -108,51 +108,42 @@ export default function CorrectionOrdersPage() {
     }, [page, status, sort, fetchData])
 
     const handleUpdateStatus = async (id: number, update: any) => {
+        console.log('handleUpdateStatus called', { id, update });
         let dataToUpload = update;
         let isFormData = update instanceof FormData;
 
         // Auto-convert plain objects to FormData since backend now uses Form fields
         if (!isFormData && typeof update === 'object' && update !== null) {
+            console.log('Converting plain object to FormData');
             dataToUpload = new FormData();
             Object.entries(update).forEach(([key, value]) => {
                 if (value !== null && value !== undefined) {
+                    // Send as string for Form fields
                     dataToUpload.append(key, String(value));
                 }
             });
             isFormData = true;
         }
 
-        // Optimistic update for simple status changes (only if it was originally not FormData)
-        if (!(update instanceof FormData)) {
-            setData(prev => {
-                if (!prev) return null
-                const updatedItems = prev.items.map(item =>
-                    item.id === id ? { ...item, ...update } : item
-                ).filter(item => {
-                    if (status === 'new') {
-                        return !item.is_corrected && !item.is_rejected && !item.is_reported
-                    } else if (status === 'corrected') {
-                        return item.is_corrected
-                    } else if (status === 'problematic') {
-                        return item.is_rejected || item.is_reported
-                    }
-                    return true
-                })
-                return {
-                    ...prev,
-                    items: updatedItems,
-                    total: prev.total - (prev.items.length - updatedItems.length)
-                }
-            })
+        // Optimistic update for simple status changes
+        if (!isFormData) {
+            // ... (keep existing optimistic logic if needed, but it's redundant now since we convert to FormData above)
         }
 
         try {
-            await api.patch(`/correction-orders/${id}`, dataToUpload)
-            toast.success('Статус обновлен')
-            fetchData(page, status, sort)
-        } catch (err) {
-            toast.error('Не удалось обновить статус')
-            fetchData(page, status, sort)
+            console.log('Sending request to backend...');
+            const response = await api.patch(`/correction-orders/${id}`, dataToUpload);
+            console.log('Backend response:', response.data);
+            toast.success('Статус обновлен');
+            fetchData(page, status, sort);
+        } catch (err: any) {
+            console.error('Failed to update status:', err);
+            if (err.response) {
+                console.error('Response data:', err.response.data);
+                console.error('Response status:', err.response.status);
+            }
+            toast.error('Не удалось обновить статус');
+            fetchData(page, status, sort);
         }
     }
 
