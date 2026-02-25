@@ -81,7 +81,7 @@ export function CorrectionOrderCard({
             </div>
 
             {/* Content Section - Reduced vertical padding, no separator */}
-            <div className="flex flex-col flex-grow p-4 md:p-5">
+            <div className="flex flex-col flex-grow p-4 md:p-5 min-w-0">
                 <div className="flex flex-wrap justify-between items-start gap-4 mb-3">
                     <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-2">
@@ -116,16 +116,16 @@ export function CorrectionOrderCard({
                         {order.description || <span className="text-muted-foreground italic font-normal">Без описания...</span>}
                     </p>
                     {order.is_reported && order.report_text && (
-                        <div className="bg-blue-500/5 border-l-2 border-blue-500 p-2.5 rounded-r-md">
+                        <div className="bg-blue-500/5 border-l-2 border-blue-500 p-2.5 rounded-r-md overflow-hidden">
                             <p className="text-[10px] text-blue-700 font-bold uppercase tracking-tight mb-0.5">Причина запроса:</p>
-                            <p className="text-xs text-blue-700 leading-snug break-words whitespace-pre-wrap">{order.report_text}</p>
+                            <p className="text-xs text-blue-700 leading-snug break-all whitespace-pre-wrap">{order.report_text}</p>
                         </div>
                     )}
 
                     {order.reply_text && (
-                        <div className="bg-green-500/5 border-l-2 border-green-500 p-2.5 rounded-r-md">
+                        <div className="bg-green-500/5 border-l-2 border-green-500 p-2.5 rounded-r-md overflow-hidden">
                             <p className="text-[10px] text-green-700 font-bold uppercase tracking-tight mb-0.5">Ответ корректора:</p>
-                            <p className="text-xs text-green-700 leading-snug break-words whitespace-pre-wrap">{order.reply_text}</p>
+                            <p className="text-xs text-green-700 leading-snug break-all whitespace-pre-wrap">{order.reply_text}</p>
                         </div>
                     )}
 
