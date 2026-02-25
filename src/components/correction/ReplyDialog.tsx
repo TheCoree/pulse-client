@@ -27,7 +27,56 @@ export function ReplyDialog({ isOpen, onClose, onConfirm, orderId }: ReplyDialog
     const [photos, setPhotos] = useState<File[]>([])
     const [previews, setPreviews] = useState<string[]>([])
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [compressionStatus, setCompressionStatus] = useState<string | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
+
+    const compressImage = async (file: File): Promise<File> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new window.Image();
+                img.src = event.target?.result as string;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 1200;
+                    const MAX_HEIGHT = 1200;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    if (!ctx) {
+                        resolve(file);
+                        return;
+                    }
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    canvas.toBlob((blob) => {
+                        if (blob) {
+                            resolve(new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", { type: 'image/jpeg' }));
+                        } else {
+                            resolve(file);
+                        }
+                    }, 'image/jpeg', 0.8);
+                };
+                img.onerror = () => resolve(file);
+            };
+            reader.onerror = () => resolve(file);
+        });
+    };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || [])
@@ -57,7 +106,20 @@ export function ReplyDialog({ isOpen, onClose, onConfirm, orderId }: ReplyDialog
     const handleSubmit = async () => {
         setIsSubmitting(true)
         try {
-            await onConfirm(text, photos)
+            // Сжатие перед отправкой
+            const compressedPhotos: File[] = []
+            if (photos.length > 0) {
+                setCompressionStatus('Сжатие изображений...')
+                for (let i = 0; i < photos.length; i++) {
+                    setCompressionStatus(`Сжатие фото ${i + 1} из ${photos.length}...`)
+                    const compressed = await compressImage(photos[i])
+                    compressedPhotos.push(compressed)
+                }
+            }
+
+            setCompressionStatus('Отправка данных...')
+            await onConfirm(text, compressedPhotos)
+
             // Reset state on success
             setText('')
             setPhotos([])
@@ -67,6 +129,7 @@ export function ReplyDialog({ isOpen, onClose, onConfirm, orderId }: ReplyDialog
             console.error('Error in ReplyDialog:', error)
         } finally {
             setIsSubmitting(false)
+            setCompressionStatus(null)
         }
     }
 
@@ -136,13 +199,21 @@ export function ReplyDialog({ isOpen, onClose, onConfirm, orderId }: ReplyDialog
                     </div>
                 </div>
 
-                <DialogFooter>
-                    <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
-                        Отмена
-                    </Button>
-                    <Button onClick={handleSubmit} disabled={isSubmitting} className="bg-green-600 hover:bg-green-700 text-white min-w-[100px]">
-                        {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Готово'}
-                    </Button>
+                <DialogFooter className="flex-col sm:flex-row gap-2">
+                    {compressionStatus && (
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground mr-auto animate-pulse">
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                            {compressionStatus}
+                        </div>
+                    )}
+                    <div className="flex gap-2 justify-end w-full sm:w-auto">
+                        <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
+                            Отмена
+                        </Button>
+                        <Button onClick={handleSubmit} disabled={isSubmitting} className="bg-green-600 hover:bg-green-700 text-white min-w-[100px]">
+                            {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Готово'}
+                        </Button>
+                    </div>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
