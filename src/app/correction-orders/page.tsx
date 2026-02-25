@@ -48,6 +48,7 @@ import { Loader2, Inbox, CheckCircle2, AlertCircle, ArrowUpDown } from 'lucide-r
 // Modular Components
 import { CorrectionOrderCard } from '@/components/correction/CorrectionOrderCard'
 import { CorrectionOrderLightbox } from '@/components/correction/CorrectionOrderLightbox'
+import { ReplyDialog } from '@/components/correction/ReplyDialog'
 
 interface CorrectionOrder {
     id: number
@@ -63,6 +64,8 @@ interface CorrectionOrder {
     is_rejected: boolean
     is_user_confirmed: boolean
     is_updated: boolean
+    reply_text?: string
+    reply_photo_urls: string[]
 }
 
 interface ApiResponse {
@@ -84,6 +87,7 @@ export default function CorrectionOrdersPage() {
     // State for Dialogs
     const [deleteOrderId, setDeleteOrderId] = useState<number | null>(null)
     const [reportOrder, setReportOrder] = useState<{ id: number, text: string } | null>(null)
+    const [confirmReplyOrder, setConfirmReplyOrder] = useState<number | null>(null)
     const [lightbox, setLightbox] = useState<{ urls: string[], index: number } | null>(null)
 
     const fetchData = useCallback(async (p: number, s: string, so: string) => {
@@ -104,37 +108,51 @@ export default function CorrectionOrdersPage() {
     }, [page, status, sort, fetchData])
 
     const handleUpdateStatus = async (id: number, update: any) => {
-        // Optimistic update
-        setData(prev => {
-            if (!prev) return null
-            const updatedItems = prev.items.map(item =>
-                item.id === id ? { ...item, ...update } : item
-            ).filter(item => {
-                // Filter out items that no longer match the current tab's status
-                if (status === 'new') {
-                    return !item.is_corrected && !item.is_rejected && !item.is_reported
-                } else if (status === 'corrected') {
-                    return item.is_corrected
-                } else if (status === 'problematic') {
-                    return item.is_rejected || item.is_reported
+        let dataToUpload = update;
+        let isFormData = update instanceof FormData;
+
+        // Auto-convert plain objects to FormData since backend now uses Form fields
+        if (!isFormData && typeof update === 'object' && update !== null) {
+            dataToUpload = new FormData();
+            Object.entries(update).forEach(([key, value]) => {
+                if (value !== null && value !== undefined) {
+                    dataToUpload.append(key, String(value));
                 }
-                return true
+            });
+            isFormData = true;
+        }
+
+        // Optimistic update for simple status changes (only if it was originally not FormData)
+        if (!(update instanceof FormData)) {
+            setData(prev => {
+                if (!prev) return null
+                const updatedItems = prev.items.map(item =>
+                    item.id === id ? { ...item, ...update } : item
+                ).filter(item => {
+                    if (status === 'new') {
+                        return !item.is_corrected && !item.is_rejected && !item.is_reported
+                    } else if (status === 'corrected') {
+                        return item.is_corrected
+                    } else if (status === 'problematic') {
+                        return item.is_rejected || item.is_reported
+                    }
+                    return true
+                })
+                return {
+                    ...prev,
+                    items: updatedItems,
+                    total: prev.total - (prev.items.length - updatedItems.length)
+                }
             })
-            return {
-                ...prev,
-                items: updatedItems,
-                total: prev.total - (prev.items.length - updatedItems.length)
-            }
-        })
+        }
 
         try {
-            await api.patch(`/correction-orders/${id}`, update)
+            const headers = isFormData ? { 'Content-Type': 'multipart/form-data' } : {};
+            await api.patch(`/correction-orders/${id}`, dataToUpload, { headers })
             toast.success('Статус обновлен')
-            // Fetch fresh data in background to stay in sync
             fetchData(page, status, sort)
         } catch (err) {
             toast.error('Не удалось обновить статус')
-            // Rollback optimistic update on error by fetching data
             fetchData(page, status, sort)
         }
     }
@@ -160,6 +178,24 @@ export default function CorrectionOrdersPage() {
             is_rejected: false
         })
         setReportOrder(null)
+    }
+
+    const handleConfirmReply = async (text: string, photos: File[]) => {
+        if (!confirmReplyOrder) return
+
+        const formData = new FormData()
+        formData.append('is_corrected', 'true')
+        formData.append('is_rejected', 'false')
+        formData.append('is_reported', 'false')
+        formData.append('report_text', '')
+        formData.append('is_user_confirmed', 'false')
+        formData.append('is_updated', 'false')
+
+        if (text) formData.append('reply_text', text)
+        photos.forEach(photo => formData.append('reply_photos', photo))
+
+        await handleUpdateStatus(confirmReplyOrder, formData)
+        setConfirmReplyOrder(null)
     }
 
     if (authLoading) {
@@ -229,6 +265,7 @@ export default function CorrectionOrdersPage() {
                                 onUpdateStatus={handleUpdateStatus}
                                 onDelete={setDeleteOrderId}
                                 onReport={(id) => setReportOrder({ id, text: '' })}
+                                onConfirmWithReply={setConfirmReplyOrder}
                                 onOpenLightbox={(urls, index) => setLightbox({ urls, index })}
                             />
                         ))}
@@ -320,6 +357,14 @@ export default function CorrectionOrdersPage() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            {/* ── Dialog for Reply Attachments ─────────────────────────────────────── */}
+            <ReplyDialog
+                isOpen={confirmReplyOrder !== null}
+                onClose={() => setConfirmReplyOrder(null)}
+                orderId={confirmReplyOrder || 0}
+                onConfirm={handleConfirmReply}
+            />
 
             {/* ── Image Lightbox ─────────────────────────────────────────────────── */}
             {lightbox && (

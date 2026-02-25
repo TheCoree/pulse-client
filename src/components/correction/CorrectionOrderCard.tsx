@@ -25,6 +25,8 @@ interface CorrectionOrder {
     is_rejected: boolean
     is_user_confirmed: boolean
     is_updated: boolean
+    reply_text?: string
+    reply_photo_urls: string[]
 }
 
 interface CorrectionOrderCardProps {
@@ -33,6 +35,7 @@ interface CorrectionOrderCardProps {
     onUpdateStatus: (id: number, update: any) => void
     onDelete: (id: number) => void
     onReport: (id: number) => void
+    onConfirmWithReply: (id: number) => void
     onOpenLightbox: (urls: string[], index: number) => void
 }
 
@@ -42,6 +45,7 @@ export function CorrectionOrderCard({
     onUpdateStatus,
     onDelete,
     onReport,
+    onConfirmWithReply,
     onOpenLightbox
 }: CorrectionOrderCardProps) {
     const tgLink = order.telegram_username
@@ -117,6 +121,33 @@ export function CorrectionOrderCard({
                             <p className="text-xs text-blue-700 leading-snug">{order.report_text}</p>
                         </div>
                     )}
+
+                    {order.reply_text && (
+                        <div className="bg-green-500/5 border-l-2 border-green-500 p-2.5 rounded-r-md">
+                            <p className="text-[10px] text-green-700 font-bold uppercase tracking-tight mb-0.5">Ответ корректора:</p>
+                            <p className="text-xs text-green-700 leading-snug">{order.reply_text}</p>
+                        </div>
+                    )}
+
+                    {order.reply_photo_urls && order.reply_photo_urls.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-2">
+                            {order.reply_photo_urls.map((url, i) => (
+                                <div
+                                    key={i}
+                                    className="relative w-16 h-16 rounded-md overflow-hidden cursor-pointer hover:ring-2 ring-primary transition-all shadow-sm"
+                                    onClick={(e) => { e.stopPropagation(); onOpenLightbox(order.reply_photo_urls, i); }}
+                                >
+                                    <Image
+                                        src={`${process.env.NEXT_PUBLIC_API_URL}${url}`}
+                                        alt={`Reply photo ${i}`}
+                                        fill
+                                        className="object-cover"
+                                        unoptimized
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 <div className="mt-4 flex flex-wrap justify-between items-center gap-4">
@@ -153,14 +184,21 @@ export function CorrectionOrderCard({
                                             disabled={order.is_user_confirmed}
                                             variant={order.is_corrected ? "secondary" : "default"}
                                             className={`h-8 px-3 text-xs font-semibold transition-all ${!order.is_corrected ? "bg-green-600 hover:bg-green-700 text-white shadow-sm" : ""}`}
-                                            onClick={() => onUpdateStatus(order.id, {
-                                                is_corrected: !order.is_corrected,
-                                                is_rejected: false,
-                                                is_reported: false,
-                                                report_text: null,
-                                                is_user_confirmed: false,
-                                                is_updated: false // Сбрасываем флаг обновления, так как админ посмотрел
-                                            })}
+                                            onClick={() => {
+                                                if (order.is_corrected) {
+                                                    // Rollback logic
+                                                    onUpdateStatus(order.id, {
+                                                        is_corrected: false,
+                                                        is_rejected: false,
+                                                        is_reported: false,
+                                                        report_text: null,
+                                                        is_user_confirmed: false,
+                                                        is_updated: false
+                                                    })
+                                                } else {
+                                                    onConfirmWithReply(order.id)
+                                                }
+                                            }}
                                         >
                                             <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
                                             {order.is_corrected ? "Откатить" : "Готово"}
