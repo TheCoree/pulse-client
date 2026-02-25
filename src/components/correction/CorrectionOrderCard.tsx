@@ -118,14 +118,14 @@ export function CorrectionOrderCard({
                     {order.is_reported && order.report_text && (
                         <div className="bg-blue-500/5 border-l-2 border-blue-500 p-2.5 rounded-r-md">
                             <p className="text-[10px] text-blue-700 font-bold uppercase tracking-tight mb-0.5">Причина запроса:</p>
-                            <p className="text-xs text-blue-700 leading-snug">{order.report_text}</p>
+                            <p className="text-xs text-blue-700 leading-snug break-words whitespace-pre-wrap">{order.report_text}</p>
                         </div>
                     )}
 
                     {order.reply_text && (
                         <div className="bg-green-500/5 border-l-2 border-green-500 p-2.5 rounded-r-md">
                             <p className="text-[10px] text-green-700 font-bold uppercase tracking-tight mb-0.5">Ответ корректора:</p>
-                            <p className="text-xs text-green-700 leading-snug">{order.reply_text}</p>
+                            <p className="text-xs text-green-700 leading-snug break-words whitespace-pre-wrap">{order.reply_text}</p>
                         </div>
                     )}
 
