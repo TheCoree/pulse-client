@@ -147,8 +147,7 @@ export default function CorrectionOrdersPage() {
         }
 
         try {
-            const headers = isFormData ? { 'Content-Type': 'multipart/form-data' } : {};
-            await api.patch(`/correction-orders/${id}`, dataToUpload, { headers })
+            await api.patch(`/correction-orders/${id}`, dataToUpload)
             toast.success('Статус обновлен')
             fetchData(page, status, sort)
         } catch (err) {
