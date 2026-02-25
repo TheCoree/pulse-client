@@ -31,40 +31,44 @@ export function ReplyDialog({ isOpen, onClose, onConfirm, orderId }: ReplyDialog
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     useEffect(() => {
-        const handlePaste = (e: ClipboardEvent) => {
-            if (!isOpen) return
+        // We now use onPaste on the DialogContent directly for better reliability
+    }, [isOpen])
 
-            // Check if user is typing in the textarea, we still want to allow pasting images
-            const items = e.clipboardData?.items
-            if (!items) return
+    const handlePaste = (e: React.ClipboardEvent) => {
+        console.log('Paste event detected', { items: e.clipboardData?.items?.length });
 
-            const imageFiles: File[] = []
-            for (let i = 0; i < items.length; i++) {
-                if (items[i].type.indexOf('image') !== -1) {
-                    const file = items[i].getAsFile()
-                    if (file) {
-                        // Create a more descriptive name if it's just 'image'
-                        const fileName = file.name === 'image' ? `pasted-image-${Date.now()}-${i}.png` : file.name;
-                        imageFiles.push(new File([file], fileName, { type: file.type }));
-                    }
+        const items = e.clipboardData?.items
+        if (!items) return
+
+        const imageFiles: File[] = []
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].type.indexOf('image') !== -1) {
+                const file = items[i].getAsFile()
+                if (file) {
+                    console.log('Found image in clipboard:', file.name, file.type);
+                    // Create a more descriptive name if it's just 'image'
+                    const fileName = file.name === 'image' || !file.name ? `pasted-image-${Date.now()}-${i}.png` : file.name;
+                    imageFiles.push(new File([file], fileName, { type: file.type }));
                 }
-            }
-
-            if (imageFiles.length > 0) {
-                if (photos.length + imageFiles.length > 7) {
-                    alert('Можно прикрепить не более 7 фото')
-                    return
-                }
-
-                setPhotos(prev => [...prev, ...imageFiles])
-                const newPreviews = imageFiles.map(file => URL.createObjectURL(file))
-                setPreviews(prev => [...prev, ...newPreviews])
             }
         }
 
-        window.addEventListener('paste', handlePaste)
-        return () => window.removeEventListener('paste', handlePaste)
-    }, [isOpen, photos.length])
+        if (imageFiles.length > 0) {
+            // If we found images, prevent default to avoid pasting potential text representation of the image
+            // but ONLY if there were actually images.
+            if (photos.length + imageFiles.length > 7) {
+                alert('Можно прикрепить не более 7 фото')
+                return
+            }
+
+            // e.preventDefault(); // Don't prevent default, maybe they also want to paste text into the textarea
+
+            setPhotos(prev => [...prev, ...imageFiles])
+            const newPreviews = imageFiles.map(file => URL.createObjectURL(file))
+            setPreviews(prev => [...prev, ...newPreviews])
+            console.log('Successfully added pasted images');
+        }
+    }
 
     const compressImage = async (file: File): Promise<File> => {
         return new Promise((resolve, reject) => {
@@ -171,7 +175,7 @@ export function ReplyDialog({ isOpen, onClose, onConfirm, orderId }: ReplyDialog
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && !isSubmitting && onClose()}>
-            <DialogContent className="sm:max-w-[500px]">
+            <DialogContent className="sm:max-w-[500px]" onPaste={handlePaste}>
                 <DialogHeader>
                     <DialogTitle>Подтверждение заявки #{orderId}</DialogTitle>
                     <DialogDescription>
