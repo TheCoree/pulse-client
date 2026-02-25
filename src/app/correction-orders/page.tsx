@@ -105,6 +105,13 @@ export default function CorrectionOrdersPage() {
 
     useEffect(() => {
         fetchData(page, status, sort)
+
+        // Background auto-refresh every 30 seconds
+        const interval = setInterval(() => {
+            fetchData(page, status, sort, true)
+        }, 30000)
+
+        return () => clearInterval(interval)
     }, [page, status, sort, fetchData])
 
     const handleUpdateStatus = async (id: number, update: any) => {
@@ -374,7 +381,7 @@ export default function CorrectionOrdersPage() {
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setReportOrder(null)}>Отмена</Button>
-                        <Button onClick={submitReport} className="bg-yellow-600 hover:bg-yellow-700 text-white">Отправить</Button>
+                        <Button onClick={submitReport} className="bg-orange-600 hover:bg-orange-700 text-white">Отправить</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

@@ -106,7 +106,7 @@ export function CorrectionOrderCard({
                             )
                         )}
                         {order.is_rejected && <Badge variant="destructive" className="text-[10px] h-5">Отклонено</Badge>}
-                        {order.is_reported && <Badge variant="outline" className="border-blue-500 text-blue-500 bg-blue-500/5 text-[10px] h-5 font-semibold tracking-tight">Запрос инфо</Badge>}
+                        {order.is_reported && <Badge variant="outline" className="border-amber-500 text-amber-500 bg-amber-500/5 text-[10px] h-5 font-semibold tracking-tight">Запрос инфо</Badge>}
                         {order.is_updated && <Badge className="bg-orange-500 hover:bg-orange-600 text-white text-[10px] h-5">Обновлено</Badge>}
                     </div>
                 </div>
@@ -116,9 +116,9 @@ export function CorrectionOrderCard({
                         {order.description || <span className="text-muted-foreground italic font-normal">Без описания...</span>}
                     </p>
                     {order.is_reported && order.report_text && (
-                        <div className="bg-blue-500/5 border-l-2 border-blue-500 p-2.5 rounded-r-md overflow-hidden">
-                            <p className="text-[10px] text-blue-700 font-bold uppercase tracking-tight mb-0.5">Причина запроса:</p>
-                            <p className="text-xs text-blue-700 leading-snug break-all whitespace-pre-wrap">{order.report_text}</p>
+                        <div className="bg-amber-500/5 border-l-2 border-amber-500 p-2.5 rounded-r-md overflow-hidden">
+                            <p className="text-[10px] text-amber-700 font-bold uppercase tracking-tight mb-0.5">Причина запроса:</p>
+                            <p className="text-xs text-amber-700 leading-snug break-all whitespace-pre-wrap">{order.report_text}</p>
                         </div>
                     )}
 
@@ -220,7 +220,7 @@ export function CorrectionOrderCard({
                                             size="sm"
                                             disabled={order.is_user_confirmed}
                                             variant={order.is_reported ? "secondary" : "outline"}
-                                            className={`h-8 w-8 p-0 rounded-md transition-all ${order.is_reported ? "bg-blue-600/20 text-blue-700 hover:bg-blue-600/30 ring-1 ring-blue-600/30" : ""}`}
+                                            className={`h-8 w-8 p-0 rounded-md transition-all ${order.is_reported ? "bg-amber-600/20 text-amber-700 hover:bg-amber-600/30 ring-1 ring-amber-600/30" : ""}`}
                                             onClick={() => {
                                                 if (order.is_reported) {
                                                     onUpdateStatus(order.id, { is_reported: false, report_text: null })
