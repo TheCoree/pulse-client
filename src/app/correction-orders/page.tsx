@@ -90,8 +90,8 @@ export default function CorrectionOrdersPage() {
     const [confirmReplyOrder, setConfirmReplyOrder] = useState<number | null>(null)
     const [lightbox, setLightbox] = useState<{ urls: string[], index: number } | null>(null)
 
-    const fetchData = useCallback(async (p: number, s: string, so: string) => {
-        setLoading(true)
+    const fetchData = useCallback(async (p: number, s: string, so: string, silent = false) => {
+        if (!silent) setLoading(true)
         try {
             const skip = (p - 1) * limit
             const res = await api.get<ApiResponse>(`/correction-orders/?skip=${skip}&limit=${limit}&status_filter=${s}&sort=${so}`)
@@ -99,7 +99,7 @@ export default function CorrectionOrdersPage() {
         } catch (err) {
             toast.error('Ошибка при загрузке заявок')
         } finally {
-            setLoading(false)
+            if (!silent) setLoading(false)
         }
     }, [limit])
 
@@ -108,53 +108,84 @@ export default function CorrectionOrdersPage() {
     }, [page, status, sort, fetchData])
 
     const handleUpdateStatus = async (id: number, update: any) => {
-        console.log('handleUpdateStatus called', { id, update });
         let dataToUpload = update;
         let isFormData = update instanceof FormData;
 
         // Auto-convert plain objects to FormData since backend now uses Form fields
         if (!isFormData && typeof update === 'object' && update !== null) {
-            console.log('Converting plain object to FormData');
             dataToUpload = new FormData();
             Object.entries(update).forEach(([key, value]) => {
                 if (value !== null && value !== undefined) {
-                    // Send as string for Form fields
                     dataToUpload.append(key, String(value));
                 }
             });
             isFormData = true;
         }
 
-        // Optimistic update for simple status changes
-        if (!isFormData) {
-            // ... (keep existing optimistic logic if needed, but it's redundant now since we convert to FormData above)
-        }
+        // Optimistic update
+        const previousData = data;
+        setData(prev => {
+            if (!prev) return null;
+            // For status updates, we filter out the item if it no longer matches the current view
+            const updatedItems = prev.items.map(item =>
+                item.id === id ? { ...item, ... (update instanceof FormData ? {} : update) } : item
+            ).filter(item => {
+                // If we are confirming (is_corrected: true), it should move from 'new' to 'corrected'
+                const isCorrected = update instanceof FormData ? update.get('is_corrected') === 'true' : update.is_corrected;
+                const isRejected = update instanceof FormData ? update.get('is_rejected') === 'true' : update.is_rejected;
+                const isReported = update instanceof FormData ? update.get('is_reported') === 'true' : update.is_reported;
+
+                if (status === 'new') {
+                    // Item stays if it's NOT corrected, NOT rejected and NOT reported
+                    const stays = !isCorrected && !isRejected && !isReported;
+                    return stays;
+                } else if (status === 'corrected') {
+                    return isCorrected;
+                } else if (status === 'problematic') {
+                    return isRejected || isReported;
+                }
+                return true;
+            });
+
+            return {
+                ...prev,
+                items: updatedItems,
+                total: prev.total - (prev.items.length - updatedItems.length)
+            };
+        });
 
         try {
-            console.log('Sending request to backend...');
-            const response = await api.patch(`/correction-orders/${id}`, dataToUpload);
-            console.log('Backend response:', response.data);
+            await api.patch(`/correction-orders/${id}`, dataToUpload);
             toast.success('Статус обновлен');
-            fetchData(page, status, sort);
+            fetchData(page, status, sort, true); // Silent refresh
         } catch (err: any) {
-            console.error('Failed to update status:', err);
-            if (err.response) {
-                console.error('Response data:', err.response.data);
-                console.error('Response status:', err.response.status);
-            }
+            setData(previousData); // Rollback on error
             toast.error('Не удалось обновить статус');
-            fetchData(page, status, sort);
         }
     }
 
     const handleDelete = async () => {
         if (!deleteOrderId) return
+        const previousData = data
+
+        // Optimistic removal
+        setData(prev => {
+            if (!prev) return null
+            return {
+                ...prev,
+                items: prev.items.filter(item => item.id !== deleteOrderId),
+                total: prev.total - 1
+            }
+        })
+
+        setDeleteOrderId(null)
+
         try {
             await api.delete(`/correction-orders/${deleteOrderId}`)
             toast.success('Заявка успешно удалена')
-            setDeleteOrderId(null)
-            fetchData(page, status, sort)
+            fetchData(page, status, sort, true) // Silent refresh
         } catch (err) {
+            setData(previousData) // Rollback
             toast.error('Ошибка при удалении')
         }
     }
