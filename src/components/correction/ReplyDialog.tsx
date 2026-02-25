@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import {
     Dialog,
     DialogContent,
@@ -29,6 +29,42 @@ export function ReplyDialog({ isOpen, onClose, onConfirm, orderId }: ReplyDialog
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [compressionStatus, setCompressionStatus] = useState<string | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
+
+    useEffect(() => {
+        const handlePaste = (e: ClipboardEvent) => {
+            if (!isOpen) return
+
+            // Check if user is typing in the textarea, we still want to allow pasting images
+            const items = e.clipboardData?.items
+            if (!items) return
+
+            const imageFiles: File[] = []
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type.indexOf('image') !== -1) {
+                    const file = items[i].getAsFile()
+                    if (file) {
+                        // Create a more descriptive name if it's just 'image'
+                        const fileName = file.name === 'image' ? `pasted-image-${Date.now()}-${i}.png` : file.name;
+                        imageFiles.push(new File([file], fileName, { type: file.type }));
+                    }
+                }
+            }
+
+            if (imageFiles.length > 0) {
+                if (photos.length + imageFiles.length > 7) {
+                    alert('Можно прикрепить не более 7 фото')
+                    return
+                }
+
+                setPhotos(prev => [...prev, ...imageFiles])
+                const newPreviews = imageFiles.map(file => URL.createObjectURL(file))
+                setPreviews(prev => [...prev, ...newPreviews])
+            }
+        }
+
+        window.addEventListener('paste', handlePaste)
+        return () => window.removeEventListener('paste', handlePaste)
+    }, [isOpen, photos.length])
 
     const compressImage = async (file: File): Promise<File> => {
         return new Promise((resolve, reject) => {
