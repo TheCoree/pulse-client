@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils'
 export default function TimeGridHeader({ days }: { days: Date[] }) {
   return (
     <div className="sticky top-0 z-10 flex border-b border-border bg-background">
-      <div className="w-16 border-r border-border" />
+      <div className="sticky left-0 w-16 border-r border-border bg-background z-20" />
 
       {days.map(day => (
         <div
@@ -18,7 +18,7 @@ export default function TimeGridHeader({ days }: { days: Date[] }) {
             className={cn(
               'text-lg font-semibold',
               isToday(day) &&
-                'w-6 h-6 flex items-center justify-center rounded-full bg-red-500 text-white text-sm'
+              'w-6 h-6 flex items-center justify-center rounded-full bg-red-500 text-white text-sm'
             )}
           >
             {format(day, 'd')}

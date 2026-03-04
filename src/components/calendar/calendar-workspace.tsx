@@ -115,10 +115,10 @@ export default function CalendarWorkspace() {
     }
   }
 
-  const handleSaved = async () => {
+  const handleSaved = async (updatedEvent: any) => {
     await fetchEvents()
-    setMode('empty')
-    setSidebarOpen(false)
+    setSelectedEvent(updatedEvent)
+    setMode('view')
   }
 
   /* ======================= */

@@ -166,7 +166,7 @@ export function CorrectionOrderLightbox({
                                             }}
                                         >
                                             <Image
-                                                src={`${process.env.NEXT_PUBLIC_API_URL}${url}`}
+                                                src={url.startsWith('http') || url.startsWith('blob:') ? url : `${process.env.NEXT_PUBLIC_API_URL}${url}`}
                                                 alt={`Photo ${index + 1}`}
                                                 fill
                                                 className="object-contain"

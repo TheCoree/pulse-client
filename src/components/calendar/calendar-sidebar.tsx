@@ -14,7 +14,7 @@ interface Props {
   onCreate: () => void
   onClose: () => void
   onDelete: () => void
-  onSaved: () => void
+  onSaved: (event: any) => void
 }
 
 export default function CalendarSidebar({
@@ -28,9 +28,9 @@ export default function CalendarSidebar({
   onSaved,
 }: Props) {
   return (
-    <div className="h-full flex flex-col bg-background">
+    <div className="h-full flex flex-col bg-background overflow-hidden">
 
-      {/* HEADER */}
+      {/* HEADER — always visible */}
       <div className="flex items-center justify-between px-4 py-3 border-b flex-shrink-0 h-[45px]">
         <span className="font-semibold">
           {mode === 'create'
@@ -50,11 +50,11 @@ export default function CalendarSidebar({
         </button>
       </div>
 
-      {/* CONTENT */}
-      <div className="flex-1 overflow-y-auto min-w-0 p-4">
+      {/* CONTENT — fills remaining height; each child manages its own scroll */}
+      <div className="flex-1 min-h-0">
 
         {mode === 'empty' && (
-          <div className="text-muted-foreground">
+          <div className="p-4 text-muted-foreground text-sm">
             Выберите событие или создайте новое
           </div>
         )}
@@ -62,6 +62,7 @@ export default function CalendarSidebar({
         {mode === 'view' && selectedEvent && (
           <EventDetails
             event={selectedEvent}
+            calendarId={calendarId}
             onEdit={onEdit}
             onDelete={onDelete}
           />

@@ -38,27 +38,27 @@ export default function TimeGrid({
   const totalHeight = hours.length * 60
 
   return (
-    <div className="flex flex-col h-full bg-background select-none">
-
-      <TimeGridHeader days={days} />
-
-      <div className="flex flex-1 overflow-auto relative">
-
-        <TimeGridTimeColumn hours={hours} />
+    <div className="flex-1 h-full overflow-auto bg-background select-none relative">
+      <div className="flex flex-col min-w-max min-h-full">
+        <TimeGridHeader days={days} />
 
         <div className="flex flex-1 relative">
-          {days.map(day => (
-            <TimeGridDayColumn
-              key={day.toISOString()}
-              day={day}
-              events={events}
-              now={now}
-              startHour={startHour}
-              endHour={endHour}
-              totalHeight={totalHeight}
-              onEventClick={onEventClick}
-            />
-          ))}
+          <TimeGridTimeColumn hours={hours} />
+
+          <div className="flex flex-1 relative">
+            {days.map(day => (
+              <TimeGridDayColumn
+                key={day.toISOString()}
+                day={day}
+                events={events}
+                now={now}
+                startHour={startHour}
+                endHour={endHour}
+                totalHeight={totalHeight}
+                onEventClick={onEventClick}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>

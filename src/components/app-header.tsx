@@ -100,11 +100,13 @@ export default function AppHeader() {
                                         </NavigationMenuContent>
                                     </>
                                 ) : (
-                                    <Link href={item.href} legacyBehavior passHref>
-                                        <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                                            {item.title}
-                                        </NavigationMenuLink>
-                                    </Link>
+                                    <NavigationMenuLink
+                                        render={
+                                            <Link href={item.href} className={navigationMenuTriggerStyle()}>
+                                                {item.title}
+                                            </Link>
+                                        }
+                                    />
                                 )}
                             </NavigationMenuItem>
                         ))}
