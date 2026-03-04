@@ -48,7 +48,7 @@ export default function EventForm({
         setLoadedEventId(event.id)
       } else {
         api
-          .get(`/calendars/${calendarId}/events/${event.id}/content/`)
+          .get(`/calendars/${calendarId}/events/${event.id}/content`)
           .then(res => {
             setBlocks(res.data.map((c: any) => ({
               tempId: crypto.randomUUID(),
