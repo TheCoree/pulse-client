@@ -42,7 +42,7 @@ export default function EventDetails({
   useEffect(() => {
     if (!event?.id) return
     api
-      .get(`/calendars/${calendarId}/events/${event.id}/content`)
+      .get(`/calendars/${calendarId}/events/${event.id}/content/`)
       .then(res => setBlocks(res.data))
       .catch(() => setBlocks([]))
   }, [event?.id, calendarId])
