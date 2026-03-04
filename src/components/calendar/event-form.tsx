@@ -152,58 +152,46 @@ export default function EventForm({
         toast.success('Событие обновлено')
       }
 
-      // Save blocks in order (Parallelized with individual error handling)
-      const results = await Promise.allSettled(
-        blocks.map(async (block, i) => {
-          const order = i
+      // Save blocks in order (Parallelized)
+      const contentPromises = blocks.map(async (block, i) => {
+        const order = i
+        if (block.id != null) {
+          // Update existing: ignore 404 in case of weird race/sync
           try {
-            if (block.id != null) {
-              // Update existing
-              if (block.type === 'text') {
-                await api.patch(
-                  `/calendars/${calendarId}/events/${savedEventId}/content/${block.id}`,
-                  { text: block.text, order }
-                )
-              } else {
-                await api.patch(
-                  `/calendars/${calendarId}/events/${savedEventId}/content/${block.id}`,
-                  { order }
-                )
-              }
+            if (block.type === 'text') {
+              await api.patch(
+                `/calendars/${calendarId}/events/${savedEventId}/content/${block.id}`,
+                { text: block.text, order }
+              )
             } else {
-              // Create new
-              if (block.type === 'text') {
-                await api.post(
-                  `/calendars/${calendarId}/events/${savedEventId}/content/text`,
-                  { text: block.text, order }
-                )
-              } else if ((block.type === 'image' || block.type === 'file') && block.file) {
-                const formData = new FormData()
-                formData.append('file', block.file)
-                await api.post(
-                  `/calendars/${calendarId}/events/${savedEventId}/content/upload`,
-                  formData,
-                  { params: { order } }
-                )
-              }
+              await api.patch(
+                `/calendars/${calendarId}/events/${savedEventId}/content/${block.id}`,
+                { order }
+              )
             }
           } catch (err: any) {
-            // Re-throw with block name for identification if possible
-            const name = block.type === 'text' ? 'Текст' : block.file?.name || 'Вложение'
-            const msg = err.response?.data?.detail || err.message
-            throw new Error(`[${name}] ${msg}`)
+            if (err.response?.status !== 404) throw err
           }
-        })
-      )
+        } else {
+          // Create new
+          if (block.type === 'text') {
+            await api.post(
+              `/calendars/${calendarId}/events/${savedEventId}/content/text`,
+              { text: block.text, order }
+            )
+          } else if ((block.type === 'image' || block.type === 'file') && block.file) {
+            const formData = new FormData()
+            formData.append('file', block.file)
+            await api.post(
+              `/calendars/${calendarId}/events/${savedEventId}/content/upload`,
+              formData,
+              { params: { order } }
+            )
+          }
+        }
+      })
 
-      const failures = results.filter((r): r is PromiseRejectedResult => r.status === 'rejected')
-
-      if (failures.length > 0) {
-        const errorMsgs = failures.map(f => f.reason.message).join('\n')
-        toast.error(`Некоторые блоки не сохранились:\n${errorMsgs}`, {
-          duration: 5000
-        })
-      }
+      await Promise.all(contentPromises)
 
       setDeletedIds([]) // Clear on success
       onSaved(savedEventData)
