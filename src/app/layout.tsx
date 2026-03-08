@@ -24,6 +24,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Pulse TTM",
     description: "Профессиональный инструмент для работы с календарями, обработки заявок и эффективного администрирования.",
+    url: process.env.NEXT_PUBLIC_APP_URL,
     siteName: "Pulse TTM",
     locale: "ru_RU",
     type: "website",
@@ -38,7 +39,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Pulse TTM",
-    description: "Профессиональный инструмент для работы с календарями, обработки заявок на корректировку и эффективного администрирования.",
+    description: "Профессиональный инструмент для работы с календарями, обработки заявок и эффективного администрирования.",
     images: ["https://corede.site/images/pulse-ttm-banner-1920x1080.png"],
   },
 };
