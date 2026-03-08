@@ -18,8 +18,21 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://pulse-ttm.com"),
   title: "Pulse TTM",
-  description: "Empty",
+  description: "Профессиональный инструмент для работы с календарями, обработки заявок на корректировку и эффективного администрирования.",
+  openGraph: {
+    title: "Pulse TTM",
+    description: "Профессиональный инструмент для работы с календарями, обработки заявок на корректировку и эффективного администрирования.",
+    siteName: "Pulse TTM",
+    locale: "ru_RU",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Pulse TTM",
+    description: "Профессиональный инструмент для работы с календарями, обработки заявок на корректировку и эффективного администрирования.",
+  },
 };
 
 export default function RootLayout({
