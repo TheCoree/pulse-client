@@ -138,10 +138,12 @@ export default function AppHeader() {
                         <DropdownMenuSeparator />
 
                         <DropdownMenuGroup>
-                            <DropdownMenuItem>
-                                <User className="mr-2 h-4 w-4" />
-                                <span>Профиль</span>
-                            </DropdownMenuItem>
+                            <Link href="/profile">
+                                <DropdownMenuItem className="cursor-pointer">
+                                    <User className="mr-2 h-4 w-4" />
+                                    <span>Профиль</span>
+                                </DropdownMenuItem>
+                            </Link>
                             <DropdownMenuItem>
                                 <Settings className="mr-2 h-4 w-4" />
                                 <span>Настройки</span>

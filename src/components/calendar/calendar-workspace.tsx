@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import api from '@/lib/api'
 import { toast } from 'sonner'
 import {
@@ -29,9 +29,14 @@ interface Event {
   end: string
   calendar_id: number
 }
+interface Calendar {
+  id: number
+  name: string
+}
 
 export default function CalendarWorkspace() {
   const { calendarId } = useParams<{ calendarId: string }>()
+  const router = useRouter()
 
   const [currentDate, setCurrentDate] = useState(
     startOfWeek(startOfToday(), { weekStartsOn: 1 })
@@ -39,6 +44,7 @@ export default function CalendarWorkspace() {
 
   const [numDays, setNumDays] = useState(7)
   const [events, setEvents] = useState<Event[]>([])
+  const [calendars, setCalendars] = useState<Calendar[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   const [startHour, setStartHour] = useState(8)
@@ -89,9 +95,22 @@ export default function CalendarWorkspace() {
     }
   }
 
+  const fetchCalendars = async () => {
+    try {
+      const res = await api.get('/calendars/my')
+      setCalendars(res.data)
+    } catch {
+      toast.error('Не удалось загрузить ваши календари')
+    }
+  }
+
   useEffect(() => {
     fetchEvents()
   }, [currentDate, numDays, calendarId])
+
+  useEffect(() => {
+    fetchCalendars()
+  }, [])
 
   /* ======================= */
 
@@ -138,6 +157,11 @@ export default function CalendarWorkspace() {
         onToday={() => setCurrentDate(startOfToday())}
         onDateSelect={setCurrentDate}
         onRefresh={fetchEvents}
+        onPrevDay={() => setCurrentDate(subDays(currentDate, 1))}
+        onNextDay={() => setCurrentDate(addDays(currentDate, 1))}
+        calendars={calendars}
+        currentCalendarId={calendarId}
+        onCalendarChange={(id) => id && router.push(`/calendars/${id}`)}
         onStartHourChange={setStartHour}
         onEndHourChange={setEndHour}
         onCreateEvent={() => {

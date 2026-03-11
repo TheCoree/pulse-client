@@ -9,6 +9,7 @@ import { AnimateIcon } from '@/components/animate-ui/icons/icon'
 import { Cog } from '../animate-ui/icons/cog'
 import { ru } from 'date-fns/locale'
 import { Calendar } from '@/components/ui/calendar'
+import Link from 'next/link'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import {
   DropdownMenu,
@@ -33,6 +34,8 @@ interface CalendarHeaderProps {
   numDays: number
   displayRange: string
   currentDate: Date
+  calendars: { id: number; name: string }[]
+  currentCalendarId: string
 
   startHour: number
   endHour: number
@@ -43,6 +46,9 @@ interface CalendarHeaderProps {
   onToday: () => void
   onDateSelect: (date: Date) => void
   onRefresh: () => void
+  onPrevDay: () => void
+  onNextDay: () => void
+  onCalendarChange: (id: string | null) => void
 
   onStartHourChange: (value: number) => void
   onEndHourChange: (value: number) => void
@@ -61,6 +67,11 @@ export default function CalendarHeader({
   onToday,
   onDateSelect,
   onRefresh,
+  onPrevDay,
+  onNextDay,
+  calendars,
+  currentCalendarId,
+  onCalendarChange,
   onStartHourChange,
   onEndHourChange,
   onCreateEvent
@@ -70,9 +81,28 @@ export default function CalendarHeader({
 
       {/* LEFT */}
       <div className="flex items-center gap-4">
-        <span className="text-xl font-display tracking-tight">
-          pulse ttm
-        </span>
+        <Link href="/" className="flex items-center gap-2 outline-none">
+          <span className="text-xl font-display tracking-tight font-medium hover:opacity-80 transition-opacity whitespace-nowrap">
+            pulse ttm
+          </span>
+        </Link>
+
+        {calendars.length > 0 && (
+          <Select value={currentCalendarId} onValueChange={onCalendarChange}>
+            <SelectTrigger className="w-[200px] !h-9 bg-muted/50 border font-medium">
+              <SelectValue placeholder="Выберите календарь">
+                {calendars.find((c) => c.id.toString() === currentCalendarId)?.name}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {calendars.map((cal) => (
+                <SelectItem key={cal.id} value={cal.id.toString()}>
+                  {cal.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
 
         <Input
           type="number"
@@ -115,9 +145,19 @@ export default function CalendarHeader({
           </Button>
         </div>
 
-        <Button variant="ghost" className="h-9" onClick={onToday}>
-          Сегодня
-        </Button>
+        <div className="flex items-center bg-muted/50 rounded-md h-9">
+          <Button variant="ghost" size="icon" className="h-9 w-9" onClick={onPrevDay}>
+            <ChevronLeft size={18} />
+          </Button>
+
+          <Button variant="ghost" className="px-3 h-9 text-sm font-medium" onClick={onToday}>
+            Сегодня
+          </Button>
+
+          <Button variant="ghost" size="icon" className="h-9 w-9" onClick={onNextDay}>
+            <ChevronRight size={18} />
+          </Button>
+        </div>
       </div>
 
       {/* RIGHT */}

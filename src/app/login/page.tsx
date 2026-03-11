@@ -41,6 +41,14 @@ export default function LoginPage() {
 
     setIsLoading(true)
 
+    const formatError = (error: any) => {
+      const detail = error.response?.data?.detail
+      if (typeof detail === 'string') return detail
+      if (Array.isArray(detail)) return detail.map(d => d.msg).join(', ')
+      if (typeof detail === 'object' && detail !== null) return JSON.stringify(detail)
+      return 'Непредвиденная ошибка'
+    }
+
     try {
       const formData = new FormData()
       formData.append('username', username)
@@ -62,9 +70,7 @@ export default function LoginPage() {
       } else if (err.response.status === 401) {
         toast.error('Неверный логин или пароль')
       } else {
-        toast.error('Ошибка входа', {
-          description: err.response?.data?.detail || 'Неизвестная ошибка',
-        })
+        toast.error(formatError(err))
       }
     } finally {
       setIsLoading(false)
