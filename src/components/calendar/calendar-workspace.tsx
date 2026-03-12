@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import api from '@/lib/api'
 import { toast } from 'sonner'
 import {
@@ -37,6 +37,8 @@ interface Calendar {
 export default function CalendarWorkspace() {
   const { calendarId } = useParams<{ calendarId: string }>()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const eventIdFromUrl = searchParams.get('event')
 
   const [currentDate, setCurrentDate] = useState(
     startOfWeek(startOfToday(), { weekStartsOn: 1 })
@@ -111,6 +113,29 @@ export default function CalendarWorkspace() {
   useEffect(() => {
     fetchCalendars()
   }, [])
+
+  useEffect(() => {
+    if (eventIdFromUrl) {
+      // Find among already loaded
+      const found = events.find(e => e.id === Number(eventIdFromUrl))
+      if (found) {
+        setSelectedEvent(found)
+        setMode('view')
+        setSidebarOpen(true)
+      } else {
+        // Not in current list, fetch explicitly
+        api.get(`/events/${eventIdFromUrl}`).then(res => {
+          const e = res.data
+          setSelectedEvent(e)
+          setMode('view')
+          setSidebarOpen(true)
+
+          // Switch to the week where event starts
+          setCurrentDate(startOfWeek(new Date(e.start), { weekStartsOn: 1 }))
+        }).catch(() => { })
+      }
+    }
+  }, [eventIdFromUrl, calendarId])
 
   /* ======================= */
 

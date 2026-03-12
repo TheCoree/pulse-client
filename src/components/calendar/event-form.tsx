@@ -238,7 +238,7 @@ export default function EventForm({
 
           {/* Rich description */}
           <div className="px-4 py-4">
-            <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest mb-3">
+            <p className="text-[11px] font-bold text-muted-foreground mb-3">
               Описание
             </p>
             <EventContentEditor
@@ -271,7 +271,7 @@ export default function EventForm({
 
             {/* START */}
             <div className="px-3 py-3 space-y-2">
-              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">
+              <p className="text-[11px] font-bold text-muted-foreground">
                 Начало
               </p>
               <Popover>
@@ -313,7 +313,7 @@ export default function EventForm({
 
             {/* END */}
             <div className="px-3 py-3 space-y-2">
-              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">
+              <p className="text-[11px] font-bold text-muted-foreground">
                 Конец
               </p>
               <Popover>

@@ -1,13 +1,15 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { format } from 'date-fns'
+import { format, isSameDay } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { CorrectionOrderLightbox } from '@/components/correction/CorrectionOrderLightbox'
 import api from '@/lib/api'
-import { CalendarDays, FileIcon, Download } from 'lucide-react'
+import { CalendarDays, FileIcon, Download, Share2 } from 'lucide-react'
+import { toast } from 'sonner'
+
 
 import {
   AlertDialog,
@@ -57,21 +59,46 @@ export default function EventDetails({
     setLightboxUrls(imageUrls)
   }
 
+  const handleShare = () => {
+    const url = `${window.location.origin}/events/${event.id}`
+    navigator.clipboard.writeText(url)
+    toast.success('Ссылка на событие скопирована')
+  }
+
   return (
     <>
       <div className="flex flex-col h-full">
         {/* Scrollable content area */}
         <div className="flex-1 overflow-y-auto px-4 pt-4 pb-2 space-y-4 min-h-0">
-          {/* Title */}
-          <h2 className="text-xl font-semibold leading-tight">{event.title}</h2>
+          {/* Title row */}
+          <div className="flex items-start justify-between gap-4">
+            <h2 className="text-xl font-semibold leading-tight break-words overflow-hidden">{event.title}</h2>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 flex-shrink-0"
+              onClick={handleShare}
+              title="Поделиться событием"
+            >
+              <Share2 className="w-4 h-4" />
+            </Button>
+          </div>
 
           {/* Time range */}
           <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
             <CalendarDays className="w-4 h-4 flex-shrink-0" />
             <span>
-              {format(new Date(event.start), 'dd MMM yyyy, HH:mm', { locale: ru })}
-              {' — '}
-              {format(new Date(event.end), 'dd MMM yyyy, HH:mm', { locale: ru })}
+              {isSameDay(new Date(event.start), new Date(event.end)) ? (
+                <>
+                  {format(new Date(event.start), 'dd MMM yyyy', { locale: ru })}, {format(new Date(event.start), 'HH:mm', { locale: ru })} — {format(new Date(event.end), 'HH:mm', { locale: ru })}
+                </>
+              ) : (
+                <>
+                  {format(new Date(event.start), 'dd MMM yyyy, HH:mm', { locale: ru })}
+                  {' — '}
+                  {format(new Date(event.end), 'dd MMM yyyy, HH:mm', { locale: ru })}
+                </>
+              )}
             </span>
           </div>
 
