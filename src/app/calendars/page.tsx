@@ -5,22 +5,17 @@ import Link from 'next/link'
 import api from '@/lib/api'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
-import CalendarCard from '@/components/calendar/calendar-card'
+import CalendarCard, { Calendar } from '@/components/calendar/calendar-card'
 import AppHeader from '@/components/app-header'
-
-interface Calendar {
-  id: number
-  name: string
-  description?: string
-}
+import CreateCalendarDialog from '@/components/calendar/create-calendar-dialog'
 
 export default function CalendarsPage() {
   const [calendars, setCalendars] = useState<Calendar[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
-  const fetchCalendars = async () => {
+  const fetchCalendars = async (silent = false) => {
     try {
-      setIsLoading(true)
+      if (!silent) setIsLoading(true)
       const res = await api.get('/calendars/my')
       setCalendars(res.data)
     } catch {
@@ -38,13 +33,18 @@ export default function CalendarsPage() {
     <div className="min-h-screen bg-background">
       <AppHeader />
 
-      <main className="p-8">
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-2xl font-semibold">
-            Мои календари
-          </h1>
+      <main className="max-w-7xl mx-auto p-8">
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-display font-semibold tracking-tight">
+              Мои календари
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              Управляйте вашими событиями и расписаниями
+            </p>
+          </div>
 
-          {/* потом сюда легко добавить кнопку "Создать календарь" */}
+          <CreateCalendarDialog onSuccess={fetchCalendars} />
         </div>
 
         {isLoading && (
@@ -54,21 +54,18 @@ export default function CalendarsPage() {
         )}
 
         {!isLoading && calendars.length === 0 && (
-          <div className="text-muted-foreground">
-            У вас пока нет календарей
+          <div className="flex flex-col items-center justify-center py-20 border rounded-xl border-dashed bg-muted/20">
+            <p className="text-muted-foreground mb-4">
+              У вас пока нет календарей
+            </p>
+            <CreateCalendarDialog onSuccess={fetchCalendars} />
           </div>
         )}
 
         {!isLoading && calendars.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {calendars.map(cal => (
-              <Link
-                key={cal.id}
-                href={`/calendars/${cal.id}`}
-                className="block"
-              >
-                <CalendarCard calendar={cal} />
-              </Link>
+              <CalendarCard key={cal.id} calendar={cal} onRefresh={() => fetchCalendars(true)} />
             ))}
           </div>
         )}

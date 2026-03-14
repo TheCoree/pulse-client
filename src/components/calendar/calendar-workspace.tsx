@@ -19,7 +19,8 @@ import CalendarHeader from '@/components/calendar/calendar-header'
 import CalendarGrid from './calendar-grid'
 import CalendarSidebar from './calendar-sidebar'
 import CalendarSidebarResizable from './calendar-sidebar-resizable'
-import { Loader2 } from 'lucide-react'
+import { Loader2, X } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 interface Event {
   id: number
@@ -48,6 +49,7 @@ export default function CalendarWorkspace() {
   const [events, setEvents] = useState<Event[]>([])
   const [calendars, setCalendars] = useState<Calendar[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [hasAccess, setHasAccess] = useState(true)
 
   const [startHour, setStartHour] = useState(8)
   const [endHour, setEndHour] = useState(21)
@@ -90,8 +92,13 @@ export default function CalendarWorkspace() {
       )
 
       setEvents(res.data)
-    } catch {
-      toast.error('Ошибка загрузки событий')
+      setHasAccess(true)
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        setHasAccess(false)
+      } else {
+        toast.error('Ошибка загрузки событий')
+      }
     } finally {
       setIsLoading(false)
     }
@@ -166,6 +173,26 @@ export default function CalendarWorkspace() {
   }
 
   /* ======================= */
+  if (!hasAccess) {
+    return (
+      <div className="flex flex-col h-screen items-center justify-center p-4 text-center">
+        <div className="bg-red-500/10 p-4 rounded-full mb-4">
+          <X className="h-12 w-12 text-red-500" />
+        </div>
+        <h2 className="text-2xl font-semibold mb-2">Доступ запрещен</h2>
+        <p className="text-muted-foreground max-w-md">
+          У вас нет прав для просмотра этого календаря. Если вы считаете, что это ошибка, обратитесь к владельцу.
+        </p>
+        <Button 
+          variant="outline" 
+          className="mt-6"
+          onClick={() => router.push('/calendars')}
+        >
+          Вернуться к моим календарям
+        </Button>
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col h-screen">
